@@ -1,0 +1,28 @@
+I"+<h2>Chapter 04</h2>
+
+<p>GameMode, PlayerController, DefaultPawn등에 대해 공부했습니다.
+모든 프레임 워크 위에서의 프로그래밍은 스스로가 시스템을 만드는 것이 아닌 이상 해당 시스템의 LifeCycle을 이해하는 것이 중요합니다.</p>
+
+<p><img src="https://youtu.be/PRxAeEXnaKY" alt="" /></p>
+
+<h3>LifeCycle</h3>
+<p>LifeCycle은 프로그램 또는 프로그램 내의 인스턴스들이 사전에 정의한 이벤트들을 정의한 순서에 따라 거쳐가는 것을 의미합니다.
+예를 들어 Unity의 경우 모든 Monobehaviour는 Start()라는 이벤트가 발생한 후 Update()라는 이벤트가 발생합니다.</p>
+
+<p>UE4에서 게임플레이에 관한 이러한 이벤트를 관리할 수 있게 게임 플레이 프레임워크를 제공하며 GameMode, PlayerController등을 상속하여 새로운 클래스를 만들어서 이러한 흐름에 자신이 원하는 로직을 추가할 수 있습니다.</p>
+
+<h3>PlayController &amp; Pawn LifeCycle (Log-in Event 순서)</h3>
+<p>이번 챕터에서는 유저가 게임에 참여했을 때 ‘Log-in’이라고 하는 과정에서의 LifeCycle에 대해 배웠습니다.</p>
+
+<p>AGameModeBase, APlayerController, APawn 을 상속한 커스텀 클래스 GameMode, PlayerController, Pawn이 있을 때 PostLogin, PostInitializeComponents, OnPossess, PossessedBy 등의 이벤트 함수들은 다음과 같은 순서로 호출됩니다.</p>
+
+<ol>
+  <li>PlayerController의 생성 (PlayerController::PostInitializeComponents)</li>
+  <li>GameMode::PostLogin 호출 (아직 종료되지 않음)</li>
+  <li>GameMode::Super::PostLogin 시작 (Super::PostLogin())</li>
+  <li>Pawn::PostInitializeComponents</li>
+  <li>PlayerController::OnPossess</li>
+  <li>Pawn::PossessedBy</li>
+  <li>GameMode::PostLogin 종료</li>
+</ol>
+:ET

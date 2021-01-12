@@ -1,0 +1,34 @@
+I"c<h2 id="urp-custom-shadow-shader-도전하기-문제편13">URP Custom Shadow Shader 도전하기 : 문제편 (1/3)</h2>
+<p><img src="./01.png" alt="01" />
+왼쪽이 Custom N dot L Shader 오른쪽이 기본 Lit Shader
+이 글은 URP에서 Soft Shadow를 hlsl shader 코드로 만들어내는 내용을 다룹니다 (마둠파님의 튜토리얼을 따라하며). 사실 URP에서 SoftShadow를 얻는 것은 이제 설정 한번이면 가능합니다. Pipeline Asset에서 Shadows 항목에서 Soft Shadow를 체크해주면 한 방에 해결.
+Shadows -&gt; Soft Shadows를 체크하면 Lit Shader에서 예쁜 Soft Shadow가 나옵니다.그럼에도 불구하고 이 글을 쓰는 이유는 다음과 같습니다.
+저처럼 Unity Shader 에 익숙하지 않은, 학교에서 그래픽스 수업만 들어 glsl/hlsl shader 코드만 대충 읽을 수 있는 사람이 어떻게 Shader 문제를 해결하는지 공유하고 싶어서
+여기서 적용해본 문제 원인을 찾는 방법을 다른 문제에도 똑같이 적용해 볼 수 있으므로</p>
+
+<p>이 시리즈의 목차는 다음과 같습니다.
+URP Custom Shadow Shader 도전하기 : 문제편
+URP Custom Shadow Shader 도전하기 : 코드 따라가며 문제 원인 찾기
+URP Custom Shadow Shader 도전하기 : Frame Debugger 로 문제 원인 찾기</p>
+
+<p>이번 편인 URP Custom Shadow Shader 도전하기 : 문제편은 다음과 같이 나뉩니다.
+마둠파님 튜토리얼 따라하기
+문제 확인하기 (Shadow가 나오지 않음)</p>
+
+<ol>
+  <li>마둠파님 튜토리얼 따라하기
+마둠파 테크니컬 아트 연구소 : 네이버 블로그
+Edit descriptionblog.naver.com
+먼저 마둠파님의 튜토리얼을 따라했습니다. 전 URP와 HDRP 이전에도 Unity Shader를 직접 작성해본적 없는 뉴비 이기에 일단 무작정 튜토리얼부터 따라해봤습니다.
+제 유니티 버전은 2019.3.7f1 버전입니다. URP를 사용할 것이므로 Universal Project Template 으로 만듭니다. (URP 버전은 7.1.8입니다)
+Project Settings에 보면 UniversalRP-HighQuality 라는 이름의 Pipeline Asset이 설정된 것이 보입니다.
+Test Scene 하나를 만들고 Unlit Shader를 하나 만들어줍니다(사진에서 URP_Unlit…) 왼쪽에 보이는 머티리얼은 이 Shader를 적용한 머티리얼입니다.</li>
+</ol>
+
+<p>SHADER GRAPH CUSTOM NODE 부분 이전까지 완료한 결과튜토리얼에서 Shader Graph Custom Node 이전까지 완성한 결과입니다.</p>
+<ol>
+  <li>문제 확인 하기
+N Dot L 라이팅은 잘 먹지만 Shadow는 보이지 않는다.기대한 결과 (정답)사진에서도 보실 수 있듯 Sphere의 그림자가 Plane에 렌더되지 않고 있습니다. 작성한 코드 부분에서 문제가 있는 것 같습니다.
+여기까지 문제 확인을 마치고 다음 문제 원인을 찾는 편으로 돌아오겠습니다</li>
+</ol>
+:ET
