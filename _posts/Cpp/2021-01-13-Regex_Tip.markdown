@@ -1,0 +1,39 @@
+---
+layout: post
+title:  "C++(Cpp) Regex 사용 시 regex_match 보다는 regex_search"
+date:   2021-01-13 10:25:00 +0900
+categories: Cpp
+---
+## regex_match 보다는 regex_search
+오늘 프로그래머스 코딩문제
+[https://programmers.co.kr/learn/courses/30/lessons/42893](https://programmers.co.kr/learn/courses/30/lessons/42893) 를 풀었다.
+
+카카오 기출문제던데 진짜 2~3시간 안에 풀어야하는 시간제한 있을 때 이런 문제가 뜨면 아찔할 것 같다.. ㄷㄷ..  
+대체적으로 Regex문제이다. Class 설계하는 건 사실 간단한 것 같다.
+
+Cpp Regex에 관한 자세한 설명은 [https://modoocode.com/303](https://modoocode.com/303) 모두의 코드 블로그의 Cpp 내용을 참고했다. (개인적으로 모두의 코드 블로그 정말 좋은 것 같아요. 좋은 포스팅 감사합니다!)
+  
+문제는 regex_match를 쓰면 [https://regexr.com/](https://regexr.com/) 여기 사이트 처럼 입력 문자열안에서 pattern이 있으면 그 pattern 부분을 가져와주는줄 알았는데 아니었다.
+
+### 결론부터 말하자면 regexr.com 처럼 하고 싶으면 **regex_search** 를 사용해야한다.
+
+![01](/assets/images/Cpp/regex/01.png)
+
+```cpp
+std::regex re(regex);
+std::smatch match;
+string copy = string(html);
+int count = 0;
+
+while (std::regex_search(copy, match, re)) {
+    count++;
+    copy = match.suffix(); //suffix를 따로 해줘야한다니.. 주여
+}
+
+return count;
+```
+
+이번 문제에서 위와 같이 사용했다.
+포인트는 다음 match되는 pattern을 찾고 싶으면 suffix() 부분 (전체 string에서 match 된 pattern의 오른쪽 나머지) 을 다음 반복의 string으로 넣어줘야한다. (찾고 싶은 문자열로)
+
+나처럼 2시간 넘게 regex_match 쓰면서 왜 match가 하나도 안나와??? 울부짖지 않기를..

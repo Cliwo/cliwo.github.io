@@ -1,0 +1,34 @@
+I"_<h2 id="regex_match-보다는-regex_search">regex_match 보다는 regex_search</h2>
+
+<p>오늘 프로그래머스 코딩문제
+<a href="https://programmers.co.kr/learn/courses/30/lessons/42893">https://programmers.co.kr/learn/courses/30/lessons/42893</a> 를 풀었다.</p>
+
+<p>카카오 기출문제던데 진짜 2~3시간 안에 풀어야하는 시간제한 있을 때 이런 문제가 뜨면 아찔할 것 같다.. ㄷㄷ..<br />
+대체적으로 Regex문제이다. Class 설계하는 건 사실 간단한 것 같다.</p>
+
+<p>Cpp Regex에 관한 자세한 설명은 <a href="https://modoocode.com/303">https://modoocode.com/303</a> 모두의 코드 블로그의 Cpp 내용을 참고했다. (개인적으로 모두의 코드 블로그 정말 좋은 것 같아요. 좋은 포스팅 감사합니다!)</p>
+
+<p>문제는 regex_match를 쓰면 <a href="https://regexr.com/">https://regexr.com/</a> 여기 사이트 처럼 입력 문자열안에서 pattern이 있으면 그 pattern 부분을 가져와주는줄 알았는데 아니었다.</p>
+
+<h3 id="결론부터-말하자면-regexrcom-처럼-하고-싶으면-regex_search-를-사용해야한다">결론부터 말하자면 regexr.com 처럼 하고 싶으면 <strong>regex_search</strong> 를 사용해야한다.</h3>
+
+<p><img src="/assets/images/Cpp/regex/01.png" alt="01" /></p>
+
+<p>’’’<br />
+std::regex re(regex);
+std::smatch match;
+string copy = string(html);
+int count = 0;</p>
+
+<p>while (std::regex_search(copy, match, re)) {
+    count++;
+    copy = match.suffix(); //suffix를 따로 해줘야한다니.. 주여
+}</p>
+
+<p>return count;
+‘’’</p>
+
+<p>이번 문제에서 위와 같이 사용했다.
+포인트는 다음 match되는 pattern을 찾고 싶으면 suffix() 부분 (전체 string에서 match 된 pattern의 오른쪽 나머지) 을 다음 반복의 string으로 넣어줘야한다. (찾고 싶은 문자열로)</p>
+
+:ET
