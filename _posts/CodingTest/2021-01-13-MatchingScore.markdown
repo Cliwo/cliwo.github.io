@@ -3,6 +3,7 @@ layout: post
 title:  "매칭 점수 (Cpp)"
 date:   2021-01-13 10:40:00 +0900
 categories: CodingTest
+tags: [codingtest, cpp]
 ---
 ## 매칭 점수
 

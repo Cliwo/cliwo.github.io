@@ -3,6 +3,7 @@ layout: post
 title:  "[Unity] URP Custom Shadow Shader 도전하기 : 문제편 (1/3)"
 date:   2021-01-13 01:18:00 +0900
 categories: Unity
+tags: [unity, shader, debug]
 ---
 
 ## URP Custom Shadow Shader 도전하기 : 문제편 (1/3) 

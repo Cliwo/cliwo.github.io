@@ -3,6 +3,7 @@ layout: post
 title:  "C++(Cpp) Regex 사용 시 regex_match 보다는 regex_search"
 date:   2021-01-13 10:25:00 +0900
 categories: Cpp
+tags: [cpp, regex]
 ---
 ## regex_match 보다는 regex_search
 오늘 프로그래머스 코딩문제

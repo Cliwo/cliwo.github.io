@@ -3,6 +3,7 @@ layout: post
 title:  "[Unity] URP Custom Shadow Shader 도전하기 : Frame Debugger로 원인 찾기(3/3)"
 date:   2021-01-13 01:45:00 +0900
 categories: Unity
+tags: [unity, shader, debug]
 ---
 ## [Unity] URP Custom Shadow Shader 도전하기 : Frame Debugger로 원인 찾기(3/3)
 
