@@ -6,7 +6,7 @@ categories: ThreeJS
 tags: [three]
 ---
 
-## jekyll blog 에서 Three.js 를 써보자!
+## jekyll blog 에서 three.js 를 써보자!
 
 **이 글의 대상 :**
 1. jekyll blog에 **OpenGL Shader** 결과를 바로바로 올리고 싶다. (이미 jekyll blog를 가지고 있다.)
