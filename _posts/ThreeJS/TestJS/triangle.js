@@ -1,13 +1,6 @@
 //https://threejs.org/docs/#manual/en/introduction/Installation
 import * as THREE from 'https://unpkg.com/three@0.124.0/build/three.module.js';
 
-//1. dom을 이용해서 canvas width, height바꾸는거 구현
-//2. fetch(window.location.host + "/someFile.glsl" promise와 chain 이용해서 glsl 읽게 변경
-//  -> 해결해줌!! 굳!!!
-//3. 왜 projectionMatrix 이랑 mvMat을 그냥 쓸 수 있음? 
-//  -> https://threejs.org/docs/index.html#api/en/renderers/webgl/WebGLProgram
-//4. 
-
 const promise_vs = fetch(new Request('http://' + window.location.host + '/assets/glsls/TestJS/vs.vert/')).then(res => res.text());
 const promise_fs = fetch(new Request('http://' + window.location.host + '/assets/glsls/TestJS/fs.frag/')).then(res => res.text());
 
