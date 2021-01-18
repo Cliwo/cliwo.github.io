@@ -1,0 +1,13 @@
+I"�<h2 id="threejs-사용-시-vertex-shader에서-projectmatrix를-바로-쓸-수-있는-이유">three.js 사용 시, vertex shader에서 projectMatrix를 바로 쓸 수 있는 이유</h2>
+
+<p><img src="/assets/images/ThreeJS/2021-01-17-default_uniform/01.png" alt="01" /></p>
+<center>(default uniform 들)</center>
+<p><br /></p>
+
+<p><a href="https://threejs.org/docs/index.html#api/en/renderers/webgl/WebGLProgram">https://threejs.org/docs/index.html#api/en/renderers/webgl/WebGLProgram</a></p>
+
+<p>위의 링크에서 확인할 수 있다.
+modelMatrix, modelViewMatrix, normalMatrix (mv의 transpose) 등등 많이 쓰이는 uniform들은 아에 default uniform으로 정의 해놓은 것을 확인할 수 있다.</p>
+
+<p>괜히 또 만들어서 쓰지 말자!</p>
+:ET
