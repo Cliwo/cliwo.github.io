@@ -28,7 +28,7 @@ controls.update();
           texture.magFilter = THREE.NearestFilter;
           const repeats = planeSize / 2;
           texture.repeat.set(repeats, repeats);
-      
+
           const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
           const planeMat = new THREE.MeshPhongMaterial({
           map: texture,
@@ -84,8 +84,8 @@ var gui_holder = document.getElementById('gui_holder');
 gui_holder.appendChild(gui.domElement);
 
 
-const promise_vs = fetch(new Request('http://' + window.location.host + '/assets/glsls/RimLight/vs.vert/')).then(res => res.text());
-const promise_fs = fetch(new Request('http://' + window.location.host + '/assets/glsls/RimLight/fs.frag/')).then(res => res.text());
+const promise_vs = fetch(new Request('https://' + window.location.host + '/assets/glsls/RimLight/vs.vert/')).then(res => res.text());
+const promise_fs = fetch(new Request('https://' + window.location.host + '/assets/glsls/RimLight/fs.frag/')).then(res => res.text());
 
 Promise.all([
     promise_vs,
