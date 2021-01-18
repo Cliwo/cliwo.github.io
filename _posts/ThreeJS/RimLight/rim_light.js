@@ -20,7 +20,7 @@ controls.update();
 
 {
   const loader = new THREE.TextureLoader();
-  loader.load('http://' + window.location.host + '/assets/glsls/RimLight/checker.png/',
+  loader.load('https://' + window.location.host + '/assets/glsls/RimLight/checker.png/',
       function(texture) {
           const planeSize = 40;
           texture.wrapS = THREE.RepeatWrapping;
