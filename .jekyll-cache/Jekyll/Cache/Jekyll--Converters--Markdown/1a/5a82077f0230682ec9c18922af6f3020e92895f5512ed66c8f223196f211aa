@@ -1,0 +1,31 @@
+I"�<h2 id="jekyll-blog-에서-threejs-를-써보자">jekyll blog 에서 Three.js 를 써보자!</h2>
+
+<p>이 글의 대상 :</p>
+<ol>
+  <li>jekyll blog에 OpenGL shader 결과를 바로바로 올리고 싶다. (이미 jekyll blog를 가지고 있다.)</li>
+  <li>javascript는 하나도 모르는 그래픽스 프로그래머</li>
+  <li>인스타그램이나 핀터레스트처럼, 내가 만든 쉐이더를 아카이빙 하고 싶다.</li>
+</ol>
+
+<p>이 글의 목표 :</p>
+<ol>
+  <li>jekyll blog에서 three.js를 사용해서 3D scene을 그린다.</li>
+  <li>3D scene에 내가 만든 커스텀 glsl shader를 사용한다.</li>
+</ol>
+
+<p>목차 :</p>
+<ol>
+  <li>html 수정하기 (canvas 사용하기)</li>
+  <li>three.js를 사용하는 javascript 만들기</li>
+  <li>custom shader 붙이기</li>
+</ol>
+
+<h3 id="html-수정하기-canvas-사용하기">html 수정하기 (canvas 사용하기)</h3>
+
+<h3 id="threejs를-사용하는-javascript-만들기">three.js를 사용하는 javascript 만들기</h3>
+
+<h3 id="custom-shader-붙이기">custom shader 붙이기</h3>
+
+<p>http://blog.302chanwoo.com/2016/08/shadermaterial1/
+https://medium.com/@sidiousvic/how-to-use-shaders-as-materials-in-three-js-660d4cc3f12a</p>
+:ET
