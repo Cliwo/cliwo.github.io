@@ -1,8 +1,0 @@
-I"�<h2 id="threejs-사용-시-vertex-shader에서-projectmatrix를-바로-쓸-수-있는-이유">three.js 사용 시, vertex shader에서 projectMatrix를 바로 쓸 수 있는 이유</h2>
-
-<p><img src="/assets/images/ThreeJS/2021-01-17-default_uniform/01.png" alt="01" /></p>
-<center>(post.html)</center>
-<p><br /></p>
-
-<p><a href="https://threejs.org/docs/index.html#api/en/renderers/webgl/WebGLProgram">https://threejs.org/docs/index.html#api/en/renderers/webgl/WebGLProgram</a></p>
-:ET

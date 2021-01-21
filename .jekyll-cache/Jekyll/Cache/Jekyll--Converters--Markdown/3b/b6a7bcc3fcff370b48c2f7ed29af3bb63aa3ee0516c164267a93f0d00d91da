@@ -1,0 +1,142 @@
+I",<h2 id="threejs---rimlight-와-phong-shading-구현-glsl">ThreeJS - RimLight 와 Phong Shading 구현 (GLSL)</h2>
+
+<p>홀리씻..</p>
+
+<p>이번 포스팅은 glsl로 직접 RimLight를 구현하는 내용입니다.
+RimLight에 앞서서 Light 구현을 위해 Phong Shading도 구현했습니다.
+오랜만에 하려하니까 빡세네요 ㅋㅋ ㅜㅜ</p>
+
+<p><strong>목차 :</strong></p>
+<ol>
+  <li>Gouraud vs Phong Shading</li>
+  <li>Phong Shading 구현
+    <ol>
+      <li>Three.js - glsl Shader에서 Light 사용하기</li>
+      <li>Phong Shading 구현</li>
+    </ol>
+  </li>
+  <li>Rim Light 구현</li>
+</ol>
+
+<h3 id="1-gouraud-shading-vs-phong-shading">1. Gouraud Shading vs Phong Shading</h3>
+
+<p>참고 :<br />
+<a href="https://en.wikipedia.org/wiki/Gouraud_shading">https://en.wikipedia.org/wiki/Gouraud_shading</a><br />
+<a href="https://en.wikipedia.org/wiki/Phong_shading">https://en.wikipedia.org/wiki/Phong_shading</a><br />
+이 내용은 Wiki 기준으로 정리했습니다. 우선 가장 큰 차이는 다음과 같습니다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Lighting 연산을 Vertex 단위로 해서 interpolation 하는가 vs
+Fragment(Pixel) 단위로 하는가
+</code></pre></div></div>
+
+<p>Gouraud Shading이 Vertex 단위로 Lighting을 계산 후 선형 보간으로 Vertex 내부의 pixel의 색을 채우는 방식입니다.</p>
+
+<p><img src="/assets/images/ThreeJS/2021-01-21-RimLightDev/01.png" alt="01" /></p>
+<center>(Gouraud Shading 결과)</center>
+<p><br /></p>
+
+<p>이 방식은 Mesh가 충분히 Fine하지 않으면 하이라이트가 뭉개져서 보이게 된다는 단점이 있습니다.</p>
+
+<p>Phong Shading이 여기서 Lighting 계산을 Fragment Shader로 옮겨서, Pixel마다 따로 해주는 방식입니다.</p>
+
+<p><img src="/assets/images/ThreeJS/2021-01-21-RimLightDev/02.png" alt="01" /></p>
+<center>(Phong Shading 결과)</center>
+<p><br /></p>
+
+<p>하이라이트(Specular) 부분이 훨씬 자연스러운 것을 볼 수 있습니다.</p>
+
+<h3 id="2phong-shading-구현">2.Phong Shading 구현</h3>
+<p>참고 :<br />
+Phong Shading 구현 - <a href="http://www.opengl-tutorial.org/kr/beginners-tutorials/tutorial-8-basic-shading/">http://www.opengl-tutorial.org/kr/beginners-tutorials/tutorial-8-basic-shading/</a><br />
+Vertex Shader - <a href="https://github.com/JoeyDeVries/LearnOpenGL/blob/master/src/2.lighting/3.2.materials_exercise1/3.2.materials.vs">https://github.com/JoeyDeVries/LearnOpenGL/blob/master/src/2.lighting/3.2.materials_exercise1/3.2.materials.vs</a><br />
+Fragment Shader - <a href="https://github.com/JoeyDeVries/LearnOpenGL/blob/master/src/2.lighting/3.2.materials_exercise1/3.2.materials.fs">https://github.com/JoeyDeVries/LearnOpenGL/blob/master/src/2.lighting/3.2.materials_exercise1/3.2.materials.fs</a></p>
+
+<p>Three.js에서 Phong Shading 구현하면서 2번의 고비가 있었습니다.<br />
+첫번째는 Scene에 Add한 <strong>Light를 glsl에서 사용하는 것</strong>이었습니다. 공식 문서도 제대로 된게 없고 stackoverflow 답변들도 다 오래된 것들이더라구요 ㅜㅜ<br />
+여기서 정리해놓은 내용으로 다른 분들은 삽질하지 않으시면 좋겠습니다 ㅜ</p>
+
+<p>두번째는 Phong Shading을 구현하는 것이었는데 이것도 Three.js에서 제공하는 <strong>default uniform이 어떤 space상의 vector</strong>인지 정보가 없어서 해맸습니다.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    vec3 lightDir; //world space 세요? view space 세요?
+</code></pre></div></div>
+<p>이런게 있으면 이게 View Space 상의 방향벡터인지, World Space 상의 방향벡터인지.. 적어놔야지 알텐데 ㅡㅡ.</p>
+
+<h4 id="1threejs---glsl-shader에서-light-사용하기">1.Three.js - glsl Shader에서 Light 사용하기</h4>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span>
+<span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">uniforms</span> <span class="o">=</span> <span class="nx">THREE</span><span class="p">.</span><span class="nx">UniformsUtils</span><span class="p">.</span><span class="nx">merge</span><span class="p">(</span> <span class="p">[</span>
+    <span class="nx">THREE</span><span class="p">.</span><span class="nx">UniformsLib</span><span class="p">[</span> <span class="dl">"</span><span class="s2">lights</span><span class="dl">"</span> <span class="p">]</span>
+    <span class="p">]</span> <span class="p">);</span>
+  <span class="kd">const</span> <span class="nx">cubeMat</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">THREE</span><span class="p">.</span><span class="nx">ShaderMaterial</span><span class="p">(</span> <span class="p">{</span>
+    <span class="na">uniforms</span><span class="p">:</span> <span class="nx">uniforms</span><span class="p">,</span>
+    <span class="na">lights</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="na">vertexShader</span><span class="p">:</span> <span class="nx">vs</span><span class="p">,</span>
+    <span class="na">fragmentShader</span><span class="p">:</span> <span class="nx">fs</span>
+    <span class="p">}</span> <span class="p">);</span>
+  <span class="kd">const</span> <span class="nx">mesh</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">THREE</span><span class="p">.</span><span class="nx">Mesh</span><span class="p">(</span><span class="nx">cubeGeo</span><span class="p">,</span> <span class="nx">cubeMat</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="p">...</span>
+</code></pre></div></div>
+
+<p>이번에 RimLight + Phong Shading 구현하면서 작성한 js 부분입니다. 보시면 <strong>THREE.ShaderMaterial</strong> 로 glsl Shader를 불러옵니다.<br />
+이 때 Scene에 추가한 Light정보를 사용하려면 Three.UniformsUtils.merge로 Three.js가 제공하는 포맷에 맞는 uniform들을 설정해 줘야합니다.<br />
+또한 이를 material에 추가하는 것 뿐만 아니라</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    uniforms: uniforms,
+    lights: true,
+</code></pre></div></div>
+<p>lights: true 도 꼭 해줘야 합니다.</p>
+
+<p>여기까지는 쉬운데 그럼 glsl에서 uniform으로 어떻게 받아야 하는지가 문제입니다.</p>
+
+<p><strong>틀린 예시 #1</strong><br />
+<a href="https://stackoverflow.com/questions/30151086/threejs-how-do-i-make-a-custom-shader-be-lit-by-the-scenes-lights">https://stackoverflow.com/questions/30151086/threejs-how-do-i-make-a-custom-shader-be-lit-by-the-scenes-lights</a></p>
+
+<div class="language-glsl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">uniform</span> <span class="kt">vec3</span> <span class="n">directionalLightColor</span><span class="p">[</span> <span class="n">MAX_DIR_LIGHTS</span> <span class="p">];</span>
+<span class="k">uniform</span> <span class="kt">vec3</span> <span class="n">directionalLightDirection</span><span class="p">[</span> <span class="n">MAX_DIR_LIGHTS</span> <span class="p">];</span>
+</code></pre></div></div>
+<p>2015년도에는 이렇게 했나 봅니다. 이러면 안돌아가요 ㅠ</p>
+
+<p><strong>틀린 예시 #2</strong><br />
+<a href="https://stackoverflow.com/questions/35596705/using-lights-in-three-js-shader">https://stackoverflow.com/questions/35596705/using-lights-in-three-js-shader</a></p>
+<div class="language-glsl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#if NUM_DIR_LIGHTS &gt; 0
+</span>    <span class="k">struct</span> <span class="n">DirectionalLight</span> <span class="p">{</span>
+        <span class="kt">vec3</span> <span class="n">direction</span><span class="p">;</span>
+        <span class="kt">vec3</span> <span class="n">color</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">shadow</span><span class="p">;</span>
+        <span class="kt">float</span> <span class="n">shadowBias</span><span class="p">;</span>
+        <span class="kt">float</span> <span class="n">shadowRadius</span><span class="p">;</span>
+        <span class="kt">vec2</span> <span class="n">shadowMapSize</span><span class="p">;</span>
+     <span class="p">};</span>
+     <span class="k">uniform</span> <span class="n">DirectionalLight</span> <span class="n">directionalLights</span><span class="p">[</span> <span class="n">NUM_DIR_LIGHTS</span> <span class="p">];</span>
+<span class="cp">#endif
+</span></code></pre></div></div>
+<p>이것도 안됩니다. 최종 결과랑 조금 비슷하긴 한대, 아마 추가적인 기능들을 사용하느라 member가 늘어난 것 같습니다. 다만 결론부터 말하자면 <strong>‘uniforms’에 전달한 것과 정확하게 똑같은 형태가 아니면 에러 나고 안그려집니다.</strong></p>
+
+<p><strong>정답</strong></p>
+<div class="language-glsl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#if NUM_DIR_LIGHTS &gt; 0
+</span>    <span class="k">struct</span> <span class="n">DirectionalLight</span> <span class="p">{</span>
+        <span class="kt">vec3</span> <span class="n">direction</span><span class="p">;</span>
+        <span class="kt">vec3</span> <span class="n">color</span><span class="p">;</span>
+     <span class="p">};</span>
+     <span class="k">uniform</span> <span class="n">DirectionalLight</span> <span class="n">directionalLights</span><span class="p">[</span> <span class="n">NUM_DIR_LIGHTS</span> <span class="p">];</span>
+<span class="cp">#endif
+</span></code></pre></div></div>
+
+<p>나중에 이 게시글을 보실 때는 또 달라질 수 있어요. 정확하게 해결하는 방법은 uniforms를 log 찍어보는 것입니다.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span>
+<span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">uniforms</span> <span class="o">=</span> <span class="nx">THREE</span><span class="p">.</span><span class="nx">UniformsUtils</span><span class="p">.</span><span class="nx">merge</span><span class="p">(</span> <span class="p">[</span>
+    <span class="nx">THREE</span><span class="p">.</span><span class="nx">UniformsLib</span><span class="p">[</span> <span class="dl">"</span><span class="s2">lights</span><span class="dl">"</span> <span class="p">]</span>
+    <span class="p">]</span> <span class="p">);</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">uniforms</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="p">...</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/ThreeJS/2021-01-21-RimLightDev/03.png" alt="03" /></p>
+<center>('directionalLights' 아래 'direction' 과 'color')</center>
+<p><br />
+여기에서 찍히는 것과 완전히 동일하게 uniform 설정하시면 잘 될 겁니다.</p>
+
+<h4 id="2phong-shading-구현-1">2.Phong Shading 구현</h4>
+:ET

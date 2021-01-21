@@ -1,0 +1,155 @@
+I"vC<h2 id="threejs---rimlight-와-phong-shading-구현-glsl-2">ThreeJS - RimLight 와 Phong Shading 구현 (GLSL) #2</h2>
+
+<p>두 번째 포스팅입니다. RimLight 구현 부분을 다룹니다.</p>
+
+<p><strong>목차 :</strong></p>
+<ol>
+  <li>Gouraud vs Phong Shading (#1)</li>
+  <li>Phong Shading 구현 (#1)
+    <ol>
+      <li>Three.js - glsl Shader에서 Light 사용하기</li>
+      <li>Phong Shading 구현</li>
+    </ol>
+  </li>
+  <li>Rim Light 구현 (#2)</li>
+</ol>
+
+<h3 id="3-rim-light-구현">3. Rim Light 구현</h3>
+<p>참고 :<br />
+<a href="https://www.roxlu.com/2014/037/opengl-rim-shader">https://www.roxlu.com/2014/037/opengl-rim-shader</a></p>
+
+<div class="language-glsl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">varying</span> <span class="kt">vec3</span> <span class="n">WorldPos</span><span class="p">;</span>
+<span class="k">varying</span> <span class="kt">vec3</span> <span class="n">ViewPos</span><span class="p">;</span>
+
+<span class="k">varying</span> <span class="kt">vec3</span> <span class="n">NormalInWorld</span><span class="p">;</span>
+<span class="k">varying</span> <span class="kt">vec3</span> <span class="n">NormalInView</span><span class="p">;</span>
+
+
+<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">WorldPos</span> <span class="o">=</span> <span class="kt">vec3</span><span class="p">(</span><span class="n">modelMatrix</span> <span class="o">*</span> <span class="kt">vec4</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">));</span>
+    <span class="n">ViewPos</span> <span class="o">=</span> <span class="kt">vec3</span><span class="p">(</span><span class="n">viewMatrix</span> <span class="o">*</span> <span class="n">modelMatrix</span> <span class="o">*</span> <span class="kt">vec4</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">));</span>
+
+    <span class="n">NormalInWorld</span> <span class="o">=</span> <span class="kt">mat3</span><span class="p">(</span><span class="n">transpose</span><span class="p">(</span><span class="n">inverse</span><span class="p">(</span><span class="n">modelMatrix</span><span class="p">)))</span> <span class="o">*</span> <span class="n">normal</span><span class="p">;</span>
+    <span class="n">NormalInView</span> <span class="o">=</span> <span class="n">normalMatrix</span> <span class="o">*</span> <span class="n">normal</span><span class="p">;</span> 
+    <span class="nb">gl_Position</span> <span class="o">=</span> <span class="n">projectionMatrix</span> <span class="o">*</span> <span class="n">viewMatrix</span> <span class="o">*</span> <span class="kt">vec4</span><span class="p">(</span><span class="n">WorldPos</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<center>(vertex shader)</center>
+<p><br /></p>
+
+<div class="language-glsl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#if NUM_DIR_LIGHTS &gt; 0
+</span>    <span class="k">struct</span> <span class="n">DirectionalLight</span> <span class="p">{</span>
+        <span class="kt">vec3</span> <span class="n">direction</span><span class="p">;</span>
+        <span class="kt">vec3</span> <span class="n">color</span><span class="p">;</span>
+     <span class="p">};</span>
+     <span class="k">uniform</span> <span class="n">DirectionalLight</span> <span class="n">directionalLights</span><span class="p">[</span> <span class="n">NUM_DIR_LIGHTS</span> <span class="p">];</span>
+<span class="cp">#endif
+</span>
+<span class="k">varying</span> <span class="kt">vec3</span> <span class="n">WorldPos</span><span class="p">;</span>
+<span class="k">varying</span> <span class="kt">vec3</span> <span class="n">ViewPos</span><span class="p">;</span>
+<span class="k">varying</span> <span class="kt">vec3</span> <span class="n">NormalInView</span><span class="p">;</span>
+<span class="k">varying</span> <span class="kt">vec3</span> <span class="n">NormalInWorld</span><span class="p">;</span>
+
+
+<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="c1">// ambient</span>
+    <span class="c1">// vec3 ambient = light.ambient * material.ambient;</span>
+  	 
+    <span class="kt">vec3</span> <span class="n">normInView</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">NormalInView</span><span class="p">);</span> <span class="c1">// in view space</span>
+    <span class="kt">vec3</span> <span class="n">viewDirInViewSpace</span> <span class="o">=</span> <span class="o">-</span><span class="n">normalize</span><span class="p">(</span><span class="n">ViewPos</span><span class="p">);</span>
+    <span class="kt">vec3</span> <span class="n">viewDirInWorldSpace</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">cameraPosition</span> <span class="o">-</span> <span class="n">WorldPos</span><span class="p">);</span>
+
+    <span class="c1">// diffuse</span>
+    <span class="kt">vec3</span> <span class="n">diffuse</span> <span class="o">=</span> <span class="kt">vec3</span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">NUM_DIR_LIGHTS</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">vec3</span> <span class="n">lightDir</span> <span class="o">=</span> <span class="n">directionalLights</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">direction</span><span class="p">;</span>
+        <span class="kt">float</span> <span class="n">nDotL</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">normInView</span><span class="p">,</span> <span class="n">lightDir</span><span class="p">),</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+        <span class="n">diffuse</span> <span class="o">+=</span> <span class="n">directionalLights</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">color</span> <span class="o">*</span> <span class="p">(</span><span class="n">nDotL</span><span class="p">);</span>
+    <span class="p">}</span>
+    
+    <span class="c1">// specular</span>
+    <span class="kt">vec3</span> <span class="n">specular</span> <span class="o">=</span> <span class="kt">vec3</span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">NUM_DIR_LIGHTS</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">vec3</span> <span class="n">reflectDir</span> <span class="o">=</span> <span class="n">reflect</span><span class="p">(</span><span class="o">-</span><span class="n">directionalLights</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">direction</span><span class="p">,</span> <span class="n">normInView</span><span class="p">);</span> 
+        <span class="kt">float</span> <span class="n">spec</span> <span class="o">=</span> <span class="n">pow</span><span class="p">(</span><span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">viewDirInViewSpace</span><span class="p">,</span> <span class="n">reflectDir</span><span class="p">),</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">),</span> <span class="mi">50</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+        <span class="n">specular</span> <span class="o">+=</span> <span class="n">directionalLights</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">color</span> <span class="o">*</span> <span class="n">spec</span><span class="p">;</span>  
+    <span class="p">}</span>
+   
+    <span class="c1">// Rim Light</span>
+    <span class="kt">float</span> <span class="n">vDn</span> <span class="o">=</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span> <span class="o">-</span> <span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">viewDirInViewSpace</span><span class="p">,</span> <span class="n">normInView</span><span class="p">),</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+    <span class="kt">vec3</span> <span class="n">rim</span> <span class="o">=</span> <span class="kt">vec3</span><span class="p">(</span><span class="n">smoothstep</span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="n">vDn</span><span class="p">));</span>
+
+    <span class="nb">gl_FragColor</span> <span class="o">=</span> <span class="kt">vec4</span><span class="p">(</span><span class="n">diffuse</span> <span class="o">+</span> <span class="n">specular</span> <span class="o">+</span> <span class="n">rim</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span> 
+</code></pre></div></div>
+<center>(fragment shader)</center>
+<p><br /></p>
+
+<p><strong>Fragment Shader</strong></p>
+<div class="language-glsl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Rim Light</span>
+<span class="kt">float</span> <span class="n">vDn</span> <span class="o">=</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span> <span class="o">-</span> <span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">viewDirInViewSpace</span><span class="p">,</span> <span class="n">normInView</span><span class="p">),</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+<span class="kt">vec3</span> <span class="n">rim</span> <span class="o">=</span> <span class="kt">vec3</span><span class="p">(</span><span class="n">smoothstep</span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="n">vDn</span><span class="p">));</span>
+
+<span class="nb">gl_FragColor</span> <span class="o">=</span> <span class="kt">vec4</span><span class="p">(</span><span class="n">diffuse</span> <span class="o">+</span> <span class="n">specular</span> <span class="o">+</span> <span class="n">rim</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+</code></pre></div></div>
+<center>(rim light)</center>
+<p><br /></p>
+
+<p>rim light는 <strong>fresnel 방정식</strong>에 의해서 설명되고, 백라이트가 강할 때 물체의 테두리 부분에 강한 반사가 일어나는 현상을 의미합니다. <strong>백라이트가 강해야</strong> 잘 보여서 Scene에 back light를 추가하고 intensity를 충분히 주는 것이 중요합니다.</p>
+
+<h4 id="fresnel-방정식">Fresnel 방정식</h4>
+<p>코드를 보기전에 프레넬 방정식을 짚고 넘어갑시다. 프레넬 방정식은</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>빛이 매질의 경계에 입사할 때 굴절(투과), 반사량을 설명하는 방정식
+</code></pre></div></div>
+
+<p>입니다.<br />
+여기서 입사각에 따른 굴절각, 전반사 등을 설명하는 법칙이 Snell의 굴절 법칙 (Snell’s law) 가 있습니다. (프레넬 방정식의 일부)</p>
+
+<p><img src="/assets/images/ThreeJS/2021-01-21-RimLightDev/07.png" alt="07" /></p>
+<center>(Snell's law)</center>
+<p><br /></p>
+
+<p><img src="/assets/images/ThreeJS/2021-01-21-RimLightDev/06.png" alt="06" /></p>
+<center>(Snell's law)</center>
+<p><br /></p>
+
+<p>n1과 n2는 주어지는 상수 (굴절률) 이고 입사각이 커질수록 굴절각도 커지는 것을 볼 수 있습니다. (비례하니까요) 여기서 <strong>굴절각이 커저서 90도를 이루게 되면 이 후, 더 이상 굴절은 일어나지 않고 반사만 일어납니다.</strong> 즉 입사하는 모든 빛이 매질 안으로 들어가지 않고 다 반사된다는 것이죠.</p>
+
+<p>이걸 눈의 입장에서 생각하면, <strong>표면과 비스듬하게 바라보면, 입사하는 빛이 물체에 흡수되지 않고 죄다 눈으로 반사</strong>된다는 말이 됩니다. 
+그래서 <strong>물체가 밝게 보이게 되죠</strong>.</p>
+
+<p>여기서 ‘비스듬하게’는 결국 <strong>표면의 법선 벡터와 거의 90도</strong>를 이루게 본다는 뜻입니다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>즉, 림라이트가 발생하는 위치는 카메라와 normal이 거의 90도를 이루는 부분입니다.
+</code></pre></div></div>
+
+<p>따라서 viewDir와 normal에 적절한 연산을 해서 밝게 해줄 곳을 찾으면 됩니다.</p>
+
+<p>다시 코드로 돌아가서</p>
+<div class="language-glsl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Rim Light</span>
+<span class="kt">float</span> <span class="n">vDn</span> <span class="o">=</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span> <span class="o">-</span> <span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">viewDirInViewSpace</span><span class="p">,</span> <span class="n">normInView</span><span class="p">),</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+<span class="kt">vec3</span> <span class="n">rim</span> <span class="o">=</span> <span class="kt">vec3</span><span class="p">(</span><span class="n">smoothstep</span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="n">vDn</span><span class="p">));</span>
+
+<span class="nb">gl_FragColor</span> <span class="o">=</span> <span class="kt">vec4</span><span class="p">(</span><span class="n">diffuse</span> <span class="o">+</span> <span class="n">specular</span> <span class="o">+</span> <span class="n">rim</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+</code></pre></div></div>
+<center>(rim light)</center>
+<p><br /></p>
+
+<p>vDn은 viewDir과 normal이 얼마나 90도에 가까운 각을 이루는지 설명합니다.<br />
+smoothstep부분은 trick에 가깝습니다.</p>
+
+<p><img src="/assets/images/ThreeJS/2021-01-21-RimLightDev/08.png" alt="08" /></p>
+<center>(제대로 된 Fresnel)</center>
+<p><br /></p>
+
+<p>제대로 하려면 위의 함수를 사용해서(점선이 Reflection입니다.) 90도에 가까우면 급격하게 상승시켜야 하지만 <strong>비용도 비싸고</strong>, 정확히 묘사하려면 <strong>매질마다 함수가 달라져야</strong>해서 (굴절율이 다르므로) smoothstep으로 적당히 조절합니다.</p>
+
+<p>따라서 단 2줄 안에 Rim Light 구현이 끝나게 됩니다.</p>
+
+<p>이상으로 Phong Shading과 Rim Light 구현 포스팅을 마치도록 하겠습니다. 궁금하신점 있다면 issue 로 달아주세요!</p>
+:ET

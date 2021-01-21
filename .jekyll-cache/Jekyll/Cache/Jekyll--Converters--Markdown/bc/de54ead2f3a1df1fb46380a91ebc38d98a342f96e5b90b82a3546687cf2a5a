@@ -1,0 +1,65 @@
+I"h<h2 id="threejs---rimlight-와-phong-shading-구현-glsl">ThreeJS - RimLight 와 Phong Shading 구현 (GLSL)</h2>
+
+<p>홀리씻..</p>
+
+<p>이번 포스팅은 glsl로 직접 RimLight를 구현하는 내용입니다.
+RimLight에 앞서서 Light 구현을 위해 Phong Shading도 구현했습니다.
+오랜만에 하려하니까 빡세네요 ㅋㅋ ㅜㅜ</p>
+
+<p><strong>목차 :</strong></p>
+<ol>
+  <li>Gouraud vs Phong Shading</li>
+  <li>Phong Shading 구현
+    <ol>
+      <li>Three.js - glsl Shader에서 Light 사용하기</li>
+      <li>Phong Shading 구현</li>
+    </ol>
+  </li>
+  <li>Rim Light 구현</li>
+</ol>
+
+<h3 id="1-gouraud-shading-vs-phong-shading">1. Gouraud Shading vs Phong Shading</h3>
+
+<p>참고 :<br />
+<a href="https://en.wikipedia.org/wiki/Gouraud_shading">https://en.wikipedia.org/wiki/Gouraud_shading</a><br />
+<a href="https://en.wikipedia.org/wiki/Phong_shading">https://en.wikipedia.org/wiki/Phong_shading</a><br />
+이 내용은 Wiki 기준으로 정리했습니다. 우선 가장 큰 차이는 다음과 같습니다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Lighting 연산을 Vertex 단위로 해서 interpolation 하는가 vs
+Fragment(Pixel) 단위로 하는가
+</code></pre></div></div>
+
+<p>Gouraud Shading이 Vertex 단위로 Lighting을 계산 후 선형 보간으로 Vertex 내부의 pixel의 색을 채우는 방식입니다.</p>
+
+<p><img src="/assets/images/ThreeJS/2021-01-21-RimLightDev/01.png" alt="01" /></p>
+<center>(Gouraud Shading 결과))</center>
+<p><br /></p>
+
+<p>이 방식은 Mesh가 충분히 Fine하지 않으면 하이라이트가 뭉개져서 보이게 된다는 단점이 있습니다.</p>
+
+<p>Phong Shading이 여기서 Lighting 계산을 Fragment Shader로 옮겨서, Pixel마다 따로 해주는 방식입니다.</p>
+
+<p><img src="/assets/images/ThreeJS/2021-01-21-RimLightDev/02.png" alt="01" /></p>
+<center>(Phong Shading 결과))</center>
+<p><br /></p>
+
+<p>하이라이트(Specular) 부분이 훨씬 자연스러운 것을 볼 수 있습니다.</p>
+
+<h3 id="2phong-shading-구현">2.Phong Shading 구현</h3>
+<p>참고 :<br />
+Phong Shading 구현 - <a href="http://www.opengl-tutorial.org/kr/beginners-tutorials/tutorial-8-basic-shading/">http://www.opengl-tutorial.org/kr/beginners-tutorials/tutorial-8-basic-shading/</a><br />
+Vertex Shader - <a href="https://github.com/JoeyDeVries/LearnOpenGL/blob/master/src/2.lighting/3.2.materials_exercise1/3.2.materials.vs">https://github.com/JoeyDeVries/LearnOpenGL/blob/master/src/2.lighting/3.2.materials_exercise1/3.2.materials.vs</a><br />
+Fragment Shader - <a href="https://github.com/JoeyDeVries/LearnOpenGL/blob/master/src/2.lighting/3.2.materials_exercise1/3.2.materials.fs">https://github.com/JoeyDeVries/LearnOpenGL/blob/master/src/2.lighting/3.2.materials_exercise1/3.2.materials.fs</a></p>
+
+<p>Three.js에서 Phong Shading 구현하면서 2번의 고비가 있었습니다.<br />
+첫번째는 Scene에 Add한 <strong>Light를 glsl에서 사용하는 것</strong>이었습니다. 공식 문서도 제대로 된게 없고 stackoverflow 답변들도 다 오래된 것들이더라구요 ㅜㅜ<br />
+여기서 정리해놓은 내용으로 다른 분들은 삽질하지 않으시면 좋겠습니다 ㅜ</p>
+
+<p>두번째는 Phong Shading을 구현하는 것이었는데 이것도 Three.js에서 제공하는 <strong>default uniform이 어떤 space상의 vector</strong>인지 정보가 없어서 해맸습니다.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    vec3 lightDir; //world space 세요? view space 세요?
+</code></pre></div></div>
+<p>이런게 있으면 이게 View Space 상의 방향벡터인지, World Space 상의 방향벡터인지.. 적어놔야지 알텐데 ㅡㅡ.</p>
+
+<h4 id="1threejs---glsl-shader에서-light-사용하기">1.Three.js - glsl Shader에서 Light 사용하기</h4>
+
+:ET

@@ -20,7 +20,7 @@ controls.update();
 
 {
   const loader = new THREE.TextureLoader();
-  loader.load('https://' + window.location.host + '/assets/glsls/RimLight/checker.png/',
+  loader.load('http://' + window.location.host + '/assets/glsls/RimLight/checker.png/',
       function(texture) {
           const planeSize = 40;
           texture.wrapS = THREE.RepeatWrapping;
@@ -84,8 +84,8 @@ var gui_holder = document.getElementById('gui_holder');
 gui_holder.appendChild(gui.domElement);
 
 
-const promise_vs = fetch(new Request('https://' + window.location.host + '/assets/glsls/RimLight/vs.vert/')).then(res => res.text());
-const promise_fs = fetch(new Request('https://' + window.location.host + '/assets/glsls/RimLight/fs.frag/')).then(res => res.text());
+const promise_vs = fetch(new Request('http://' + window.location.host + '/assets/glsls/RimLight/vs.vert/')).then(res => res.text());
+const promise_fs = fetch(new Request('http://' + window.location.host + '/assets/glsls/RimLight/fs.frag/')).then(res => res.text());
 
 Promise.all([
     promise_vs,
@@ -96,7 +96,12 @@ Promise.all([
 function addCube(vs, fs)
 {
   const cubeSize = 4;
-  const cubeGeo = new THREE.BoxBufferGeometry(cubeSize, cubeSize, cubeSize);
+  // const cubeGeo = new THREE.BoxBufferGeometry(cubeSize, cubeSize, cubeSize);
+  const sphereRadius = 3;
+  const sphereWidthDivisions = 32;
+  const sphereHeightDivisions = 16;
+
+  const cubeGeo = new THREE.SphereBufferGeometry(sphereRadius, sphereWidthDivisions, sphereHeightDivisions);
   var uniforms = THREE.UniformsUtils.merge( [
     THREE.UniformsLib[ "lights" ]
     ] );
@@ -108,7 +113,8 @@ function addCube(vs, fs)
     lights: true
     } );
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
-  mesh.position.set(cubeSize + 1, cubeSize / 2, 0);
+  // mesh.position.set(cubeSize + 1, cubeSize / 2, 0);
+  mesh.position.set(-sphereRadius + 7, sphereRadius + 2, 0);
   scene.add(mesh);
 }
 {
