@@ -17,8 +17,3 @@ void main()
     NormalInView = normalMatrix * normal; 
     gl_Position = projectionMatrix * viewMatrix * vec4(WorldPos, 1.0);
 }
-
-//위에 이거 링크 대로하면 개망함, 'model의 transpose'가 아니라 model * view의 transpose 써야함.
-//근데 왜지? 이거 정리해봐야할 듯
-//참고 : https://paroj.github.io/gltut/Illumination/Tut09%20Normal%20Transformation.html 
-//와 그래도 normal이 문제라는걸 생각해 내내 ㅋㅌㅋ

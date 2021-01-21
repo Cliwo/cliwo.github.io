@@ -8,11 +8,14 @@
      uniform DirectionalLight directionalLights[ NUM_DIR_LIGHTS ];
 #endif
 
+// uniform float fresnel;
+
 varying vec3 WorldPos;
 varying vec3 ViewPos;
 varying vec3 NormalInView;
 varying vec3 NormalInWorld;
 
+uniform float frenel_smooth_step;
 
 void main()
 {
@@ -29,7 +32,7 @@ void main()
     {
         vec3 lightDir = directionalLights[i].direction;
         float nDotL = max(dot(normInView, lightDir), 0.0);
-        diffuse += directionalLights[i].color * (nDotL);
+        diffuse += directionalLights[i].color * nDotL;
     }
     
     // specular
@@ -43,21 +46,7 @@ void main()
    
     // Rim Light
     float vDn = 1.0 - max(dot(viewDirInViewSpace, normInView), 0.0);
-    vec3 rim = vec3(smoothstep(0.6, 1.0, vDn));
+    vec3 rim = vec3(smoothstep(frenel_smooth_step, 1.0, vDn));
 
-    gl_FragColor = vec4(diffuse + specular, 1.0);
-    // gl_FragColor = vec4(diffuse + specular + rim, 1.0);
-    
+    gl_FragColor = vec4(diffuse + specular + rim, 1.0);
 } 
-
-        //처음에 -안했다가 이상한 곳에 생겼음
-        //지금도 이상함. 나중에 고치기
-        // vec3 reflectDir = reflect(-directionalLights[i].direction, normalize(NormalInWorld)); 
-        // float spec = pow(max(dot(viewDirInWorldSpace, reflectDir), 0.0), 50.0);
-
-        //됬다 ㅠㅠ 성공. viewDir이 viewSpace에 있는걸 써야하는데 worldSpace 거를 게속 써서 문제였음
-        //ㅈ같은게 여기서 directionalLight의 direction은 viewSpace상의 dir인 것 같음. 아무 설명없이 ㅅ1발
-
-         // gl_FragColor = vec4(diffuse, 1.0);
-    // gl_FragColor = vec4(specular, 1.0);
-    // gl_FragColor = vec4(rim, 1.0);
