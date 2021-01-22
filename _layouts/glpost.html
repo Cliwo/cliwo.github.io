@@ -7,6 +7,15 @@ layout: post
   {% include_relative {{page.js}} %}
 {% endif %}
 </script>
+
+{% assign files = site.static_files %}
+{% for file in files %}
+  {% if file.path contains 'assets/glsls' %}
+    <script> console.log('{{file.path}}')</script>
+    {% include {{file.path}} %}
+  {% endif %}
+{% endfor %}
+
 <body>
   <canvas id="canvas" width="848" height="480"></canvas>
   <div id="gui_holder"></div>
