@@ -20,7 +20,7 @@ controls.update();
 
 {
   const loader = new THREE.TextureLoader();
-  loader.load('http://' + window.location.host + '/assets/glsls/RimLight/checker.png/',
+  loader.load('/assets/glsls/RimLight/checker.png/',
       function(texture) {
           const planeSize = 40;
           texture.wrapS = THREE.RepeatWrapping;
@@ -75,8 +75,8 @@ class ColorGUIHelper {
     }
   }
 
-const promise_vs = fetch(new Request('http://' + window.location.host + '/assets/glsls/RimLight/vs.vert/')).then(res => res.text());
-const promise_fs = fetch(new Request('http://' + window.location.host + '/assets/glsls/RimLight/fs.frag/')).then(res => res.text());
+const promise_vs = fetch(new Request('/assets/glsls/RimLight/vs.vert/')).then(res => res.text());
+const promise_fs = fetch(new Request('/assets/glsls/RimLight/fs.frag/')).then(res => res.text());
 
 Promise.all([
     promise_vs,
