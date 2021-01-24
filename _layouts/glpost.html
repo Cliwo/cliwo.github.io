@@ -2,11 +2,24 @@
 layout: post
 ---
 
+<script type="x-shader/x-vertex" id="vertexShader">
+  {% if page.vs %}
+    {% include_relative {{page.vs}} %}
+  {% endif %}
+</script>
+
+<script type="x-shader/x-fragment" id="fragmentShader">
+  {% if page.fs %}
+    {% include_relative {{page.fs}} %}
+  {% endif %}
+</script>
+
 <script type="module">
 {% if page.js %}
   {% include_relative {{page.js}} %}
 {% endif %}
 </script>
+
 <body>
   <canvas id="canvas" width="848" height="480"></canvas>
   <div id="gui_holder"></div>

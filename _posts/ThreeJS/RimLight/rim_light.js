@@ -91,14 +91,17 @@ var uniforms = THREE.UniformsUtils.merge( [
 
 function addSphere(vs, fs)
 {
+  const vs_ = document.getElementById('vertexShader').textContent
+  const fs_ = document.getElementById('fragmentShader').textContent
+
   const sphereRadius = 3;
   const sphereWidthDivisions = 32;
   const sphereHeightDivisions = 16;
   const mySphereGeo = new THREE.SphereBufferGeometry(sphereRadius, sphereWidthDivisions, sphereHeightDivisions);
   const mySphereMat = new THREE.ShaderMaterial( {
     uniforms: uniforms,
-    vertexShader: vs,
-    fragmentShader: fs,
+    vertexShader: vs_,
+    fragmentShader: fs_,
     lights: true
     } );
   const mesh = new THREE.Mesh(mySphereGeo, mySphereMat);

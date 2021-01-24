@@ -2,6 +2,8 @@
 layout: glpost
 title:  "RimLight"
 js : "/rim_light.js"
+vs : "/vs.vert"
+fs : "/fs.frag"
 date:   2021-01-18 14:50:00 +0900
 categories: ThreeJS
 tags: [three, shader]
