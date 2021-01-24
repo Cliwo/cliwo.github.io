@@ -10,3 +10,5 @@ tags: [three, shader]
 ---
 
 ## Rim Light
+
+![01](/assets/images/ThreeJS/2021-01-18-RimLight/checker.png)
