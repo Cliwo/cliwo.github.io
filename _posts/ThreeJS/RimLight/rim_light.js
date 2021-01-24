@@ -75,24 +75,16 @@ class ColorGUIHelper {
     }
   }
 
-const promise_vs = fetch(new Request('/assets/glsls/RimLight/vs.vert/')).then(res => res.text());
-const promise_fs = fetch(new Request('/assets/glsls/RimLight/fs.frag/')).then(res => res.text());
 
-Promise.all([
-    promise_vs,
-    promise_fs
-    ]).then(([vs, fs]) => addSphere(vs,fs)
-);
 
 var uniforms = THREE.UniformsUtils.merge( [
   THREE.UniformsLib[ "lights" ],
   {frenel_smooth_step: { type: "f", value: 0.7 }}
   ] );
 
-function addSphere(vs, fs)
 {
-  const vs_ = document.getElementById('vertexShader').textContent
-  const fs_ = document.getElementById('fragmentShader').textContent
+  const vs = document.getElementById('vertexShader').textContent
+  const fs = document.getElementById('fragmentShader').textContent
 
   const sphereRadius = 3;
   const sphereWidthDivisions = 32;
@@ -100,14 +92,15 @@ function addSphere(vs, fs)
   const mySphereGeo = new THREE.SphereBufferGeometry(sphereRadius, sphereWidthDivisions, sphereHeightDivisions);
   const mySphereMat = new THREE.ShaderMaterial( {
     uniforms: uniforms,
-    vertexShader: vs_,
-    fragmentShader: fs_,
+    vertexShader: vs,
+    fragmentShader: fs,
     lights: true
     } );
   const mesh = new THREE.Mesh(mySphereGeo, mySphereMat);
   mesh.position.set(-sphereRadius + 7, sphereRadius + 2, 0);
   scene.add(mesh);
 }
+
 {
   const sphereRadius = 3;
   const sphereWidthDivisions = 32;
