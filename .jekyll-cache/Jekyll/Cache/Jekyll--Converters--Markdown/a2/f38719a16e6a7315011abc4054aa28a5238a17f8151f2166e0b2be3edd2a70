@@ -1,0 +1,173 @@
+I"�Y<h2 id="여행-경로">여행 경로</h2>
+
+<p>문제 링크 : <a href="https://programmers.co.kr/learn/courses/30/lessons/43164">https://programmers.co.kr/learn/courses/30/lessons/43164</a></p>
+
+<p><img src="/assets/images/CodingTests/2021-02-03-TravelingPath/01.png" alt="01" /></p>
+
+<p>BFS/DFS에 해당하는 문제였고, DFS 방식이었다.</p>
+
+<p>보통 BFS/DFS 문제에서 BFS와 DFS중 어떤 것을 사용해야하는지 전략은 다음과 같다.</p>
+
+<p><strong>BFS</strong></p>
+<ol>
+  <li>최단 거리 탐색</li>
+</ol>
+
+<p><strong>DFS</strong></p>
+<ol>
+  <li>조건 탐색</li>
+  <li>Articulation Point 탐색 (특이한 경우)</li>
+</ol>
+
+<p>이 문제일 경우 조건 탐색에 더 부합해서 DFS를 썻다.<br />
+문제의 주요 포인트는 다음과 같다.</p>
+
+<ol>
+  <li>항상 “ICN” 공항에서 시작한다.</li>
+  <li>같은 티켓이 여러개 있을 수 있다.</li>
+  <li>가능한 경로가 2개 이상이면 ‘알파벳 순서가 앞서는 경로’를 선택한다.</li>
+  <li>주어진 항공권을 모두 사용해야한다.</li>
+</ol>
+
+<p>문제를 다 풀고 1번 조건을 뒤늦게 확인해서 해맸다… 1번 조건이 적용되면 문제가 훨씬 간단해진다.<br />
+4번 조건이 조금 까다로운데, 나 같은 경우 dfs로 답을 찾을 때 존재하는 항공권의 <strong>index</strong>를 선택하는 형식으로 짜서 해결했다. 즉, 각각의 항공권의 index는 고유하기 때문에 똑같은 티켓이 여러 개여도, 주어진 항공권을 모두 사용하는 조건도 둘 다 잡을 수 있다.<br />
+다만 이렇게 index를 뽑는 경우 3번 조건을 만족시키는게 까다롭다, 여러 path가 가능한 답안이 되면, <strong>이를 일일히 실제 string과 비교해서 alphabet 순으로 앞인 정답을 뽑아야한다</strong>.<br />
+또한 <strong>내 답은 graph를 구성하지 않고</strong>, <strong>현재 출발지에서 가능한 도착지를 매 dfs마다 다시 계산</strong>하므로 속도가 느리다.</p>
+
+<p>개인적으로 내 답이 마음에 들지 않아서, 확인했던 답 중 가장 마음에 들었던 답을 같이 포스팅 한다.</p>
+
+<h3 id="내-답">내 답</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;map&gt;
+#include &lt;algorithm&gt;
+</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">pathes</span><span class="p">;</span>
+
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">availableTickets</span><span class="p">(</span><span class="n">string</span> <span class="n">airport</span><span class="p">,</span> <span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;&gt;&amp;</span> <span class="n">tickets</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">availables</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">tickets</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">tickets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">airport</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">availables</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">availables</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">void</span> <span class="nf">dfs</span><span class="p">(</span><span class="n">string</span> <span class="n">airport</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">sol</span><span class="p">,</span> <span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;&gt;&amp;</span> <span class="n">tickets</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">sol</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="n">tickets</span><span class="p">.</span><span class="n">size</span><span class="p">())</span>
+    <span class="p">{</span>
+        <span class="n">pathes</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">sol</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ticket_use</span> <span class="o">=</span> <span class="n">availableTickets</span><span class="p">(</span><span class="n">airport</span><span class="p">,</span> <span class="n">tickets</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ticket_use</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">find</span><span class="p">(</span><span class="n">sol</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">sol</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">ticket_use</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="n">sol</span><span class="p">.</span><span class="n">end</span><span class="p">())</span>
+        <span class="p">{</span>
+            <span class="n">sol</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">ticket_use</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+            <span class="n">dfs</span><span class="p">(</span><span class="n">tickets</span><span class="p">[</span><span class="n">ticket_use</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="mi">1</span><span class="p">],</span> <span class="n">sol</span><span class="p">,</span> <span class="n">tickets</span><span class="p">);</span>
+            <span class="n">sol</span><span class="p">.</span><span class="n">pop_back</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">toVectorString</span><span class="p">(</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">answer</span><span class="p">,</span> <span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;&gt;&amp;</span> <span class="n">tickets</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">vec</span><span class="p">;</span>
+    <span class="n">vec</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">tickets</span><span class="p">[</span><span class="n">answer</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">0</span><span class="p">]);</span>
+    <span class="n">vec</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">tickets</span><span class="p">[</span><span class="n">answer</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">1</span><span class="p">]);</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">answer</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">vec</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">tickets</span><span class="p">[</span><span class="n">answer</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="mi">1</span><span class="p">]);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">vec</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">solution</span><span class="p">(</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;&gt;</span> <span class="n">tickets</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">sol</span><span class="p">;</span>
+    <span class="n">dfs</span><span class="p">(</span><span class="s">"ICN"</span><span class="p">,</span> <span class="n">sol</span><span class="p">,</span> <span class="n">tickets</span><span class="p">);</span>
+    
+    <span class="n">sort</span><span class="p">(</span><span class="n">pathes</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">pathes</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">a</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">a</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">tickets</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">tickets</span><span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">continue</span><span class="p">;</span>
+                <span class="k">return</span> <span class="n">tickets</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">tickets</span><span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="mi">1</span><span class="p">];</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+        <span class="p">});</span>
+    <span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">answer</span> <span class="o">=</span> <span class="n">toVectorString</span><span class="p">(</span><span class="n">pathes</span><span class="p">.</span><span class="n">front</span><span class="p">(),</span> <span class="n">tickets</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">answer</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="다른-분-답">다른 분 답</h3>
+<p><a href="https://programmers.co.kr/questions/11358">https://programmers.co.kr/questions/11358</a></p>
+
+<p>map에 pair를 넣을 때 <strong>“{itemA, itemB}”</strong> 형태로 넣는게 너무 마음에 들었다. cpp로도 직관적인 코드작성이 가능하다는 걸 보여주는 느낌. 덕분에 진짜 ticet의 형태처럼 <strong>“{출발지, 도착지}”</strong> 처럼 표현이 되니 한눈에 알아보기 편했다.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;map&gt;
+#include &lt;algorithm&gt;
+</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">answer</span><span class="p">;</span>
+<span class="n">map</span><span class="o">&lt;</span><span class="n">string</span><span class="p">,</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;&gt;</span> <span class="n">check</span><span class="p">;</span>
+<span class="n">map</span><span class="o">&lt;</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">string</span><span class="p">,</span><span class="n">string</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">visited</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">N</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">DFS</span><span class="p">(</span><span class="n">string</span> <span class="n">cur</span><span class="p">){</span>
+    <span class="n">answer</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">cur</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span><span class="n">answer</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">;</span>
+
+    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">check</span><span class="p">[</span><span class="n">cur</span><span class="p">].</span><span class="n">size</span><span class="p">();</span><span class="n">i</span><span class="o">++</span><span class="p">){</span>
+        <span class="n">string</span> <span class="n">next</span> <span class="o">=</span> <span class="n">check</span><span class="p">[</span><span class="n">cur</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+        <span class="cm">/* 남은 티켓 없으면 */</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">visited</span><span class="p">[{</span><span class="n">cur</span><span class="p">,</span><span class="n">next</span><span class="p">}]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">continue</span><span class="p">;</span>
+
+        <span class="n">visited</span><span class="p">[{</span><span class="n">cur</span><span class="p">,</span><span class="n">next</span><span class="p">}]</span><span class="o">--</span><span class="p">;</span>
+        <span class="n">DFS</span><span class="p">(</span><span class="n">next</span><span class="p">);</span>
+        <span class="k">if</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span><span class="n">answer</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="n">visited</span><span class="p">[{</span><span class="n">cur</span><span class="p">,</span><span class="n">next</span><span class="p">}]</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">answer</span><span class="p">.</span><span class="n">pop_back</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">solution</span><span class="p">(</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;&gt;</span> <span class="n">tickets</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">tickets</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+
+    <span class="cm">/* 그래프 만들기 */</span>
+    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">tickets</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="n">i</span><span class="o">++</span><span class="p">){</span>
+        <span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">temp</span><span class="p">;</span>
+        <span class="n">string</span> <span class="n">from</span> <span class="o">=</span> <span class="n">tickets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
+        <span class="n">string</span> <span class="n">to</span> <span class="o">=</span> <span class="n">tickets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">check</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">from</span><span class="p">)</span> <span class="o">==</span> <span class="n">check</span><span class="p">.</span><span class="n">end</span><span class="p">())</span>
+            <span class="n">check</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">make_pair</span><span class="p">(</span><span class="n">from</span><span class="p">,</span> <span class="n">temp</span><span class="p">));</span>
+        <span class="n">check</span><span class="p">[</span><span class="n">from</span><span class="p">].</span><span class="n">push_back</span><span class="p">(</span><span class="n">to</span><span class="p">);</span>
+        <span class="n">visited</span><span class="p">[{</span><span class="n">from</span><span class="p">,</span><span class="n">to</span><span class="p">}]</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* 알파벳 순서로 정렬 */</span>
+    <span class="k">for</span><span class="p">(</span><span class="k">auto</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">check</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span> <span class="n">iter</span> <span class="o">!=</span> <span class="n">check</span><span class="p">.</span><span class="n">end</span><span class="p">();</span> <span class="n">iter</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">sort</span><span class="p">(</span><span class="n">iter</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">iter</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+
+    <span class="n">DFS</span><span class="p">(</span><span class="s">"ICN"</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">answer</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+:ET
