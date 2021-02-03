@@ -1,0 +1,119 @@
+I"�J<h2 id="synchronizing-clocks">Synchronizing Clocks</h2>
+
+<p>문제 링크 : <a href="https://algospot.com/judge/problem/read/CLOCKSYNC">https://algospot.com/judge/problem/read/CLOCKSYNC</a></p>
+
+<p><img src="/assets/images/CodingTests/2021-02-03-SynchronizingClocks/01.png/" alt="01" /></p>
+
+<p>완전 탐색 (Brute force) 방식은 크게</p>
+<ol>
+  <li>그냥 for문으로 돌리기</li>
+  <li>재귀로 (실행 느림)</li>
+  <li>순열</li>
+  <li>비트마스크</li>
+</ol>
+
+<p>위의 4종류라고 한다.</p>
+
+<p>순열에 해당하는 문제의 예시는 이전에 풀었던 프로그래머스의 ‘소수 찾기’ 문제가 있었다. <a href="https://programmers.co.kr/learn/courses/30/lessons/42839">https://programmers.co.kr/learn/courses/30/lessons/42839</a></p>
+
+<p>이번에는 비트마스크를 사용하는 문제였다.
+문제 풀면서 핵심은 <strong>현재 시계들의 상태를 결국 하나의 key</strong>로 사용하는데, 이 <strong>key를 string으로 저장하면 느려진다</strong>는 것이다.</p>
+
+<p>처음에는 “0000 0000 0000 0000” ~ “3333 3333 3333 3333” 처럼 16개의 시계의 상태를 문자열로 표현했는데 이렇게 하니까 너무 느렸다. 이 후 <strong>32개의 bit로 하나의 시계당 4개의 bit를 줘서 int</strong> 하나로 표현했다. 즉, 각 시계의 상태는 <strong>00 01 10 11</strong>이 있는 것.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;unordered_map&gt;
+</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="cp">#define CLOCK_NUM 16
+</span>
+<span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">clockState</span><span class="p">;</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">queries</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">input</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">count</span><span class="p">;</span>
+    <span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">count</span><span class="p">;</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">temp</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">key</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">CLOCK_NUM</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">temp</span><span class="p">;</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">key</span> <span class="o">|</span> <span class="p">((</span><span class="n">temp</span> <span class="o">==</span> <span class="mi">12</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="mi">4</span> <span class="o">-</span> <span class="n">temp</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">j</span> <span class="o">*</span> <span class="mi">2</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="n">queries</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">process</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">a</span><span class="o">++</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">b</span><span class="o">++</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span>
+                <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">d</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">d</span><span class="o">++</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">e</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">e</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">e</span><span class="o">++</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">f</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">f</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">f</span><span class="o">++</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">g</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">g</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">g</span><span class="o">++</span><span class="p">)</span>
+                                <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">h</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">h</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">h</span><span class="o">++</span><span class="p">)</span>
+                                    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+                                        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">_0</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="n">f</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_1</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">i</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_2</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="n">f</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_3</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="n">g</span><span class="o">+</span><span class="n">j</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_4</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="n">j</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_5</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="n">h</span><span class="o">+</span><span class="n">j</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_6</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span><span class="o">+</span><span class="n">e</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_7</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="n">e</span><span class="o">+</span><span class="n">h</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_8</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_9</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">j</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_10</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="o">+</span><span class="n">e</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_11</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_12</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_13</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_14</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="o">+</span><span class="n">f</span><span class="o">+</span><span class="n">g</span><span class="o">+</span><span class="n">h</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+        <span class="kt">int</span> <span class="n">_15</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="o">+</span><span class="n">f</span><span class="o">+</span><span class="n">g</span><span class="o">+</span><span class="n">h</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="p">;</span>
+
+        <span class="kt">int</span> <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">_0</span> <span class="o">&lt;&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">_1</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">_2</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">_3</span> <span class="o">&lt;&lt;</span> <span class="mi">6</span><span class="p">)</span>
+                <span class="o">|</span> <span class="p">(</span><span class="n">_4</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">_5</span> <span class="o">&lt;&lt;</span> <span class="mi">10</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">_6</span> <span class="o">&lt;&lt;</span> <span class="mi">12</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">_7</span> <span class="o">&lt;&lt;</span> <span class="mi">14</span><span class="p">)</span>
+                <span class="o">|</span> <span class="p">(</span><span class="n">_8</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">_9</span> <span class="o">&lt;&lt;</span> <span class="mi">18</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">_10</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">_11</span> <span class="o">&lt;&lt;</span> <span class="mi">22</span><span class="p">)</span>
+                <span class="o">|</span> <span class="p">(</span><span class="n">_12</span> <span class="o">&lt;&lt;</span> <span class="mi">24</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">_13</span> <span class="o">&lt;&lt;</span> <span class="mi">26</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">_14</span> <span class="o">&lt;&lt;</span> <span class="mi">28</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">_15</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">);</span>
+        
+        <span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="n">d</span> <span class="o">+</span> <span class="n">e</span> <span class="o">+</span> <span class="n">f</span> <span class="o">+</span> <span class="n">g</span> <span class="o">+</span> <span class="n">h</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="n">j</span><span class="p">);</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="n">clockState</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">clockState</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span><span class="p">;</span>
+        <span class="k">else</span>
+            <span class="n">clockState</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">min</span><span class="p">(</span><span class="n">clockState</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">count</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">output</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">:</span> <span class="n">queries</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">clockState</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="n">clockState</span><span class="p">.</span><span class="n">end</span><span class="p">())</span>
+            <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"-1 "</span><span class="p">;</span>
+        <span class="k">else</span>
+            <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">clockState</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">input</span><span class="p">();</span>
+    <span class="n">process</span><span class="p">();</span>
+    <span class="n">output</span><span class="p">();</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+:ET
