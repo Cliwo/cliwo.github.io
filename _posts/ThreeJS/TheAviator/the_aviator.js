@@ -51,6 +51,8 @@ function createScene() {
 
 //#2 Try - Success //개꿀! 근데 뭔 차이지?
     const canvas = document.querySelector('#canvas');
+    canvas.style.background = "#e4e0ba";
+
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, canvas : canvas});
     renderer.shadowMap.enabled = true;
     // container = document.getElementById('canvas');
