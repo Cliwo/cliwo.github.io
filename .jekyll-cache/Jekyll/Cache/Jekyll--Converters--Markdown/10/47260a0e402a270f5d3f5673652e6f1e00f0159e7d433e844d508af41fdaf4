@@ -1,0 +1,8 @@
+I"�<h2 id="blinn-phong-vs-phong-shading">Blinn-Phong vs Phong Shading</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Phong_shading">https://en.wikipedia.org/wiki/Phong_shading</a>
+<a href="https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_reflection_model">https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_reflection_model</a></p>
+
+<p>ToDo : 
+결론 -&gt; Blinn-Phong은 half vector 써서 최적화 하는 방식임</p>
+:ET
