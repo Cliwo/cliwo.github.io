@@ -1,0 +1,59 @@
+I"<h2 id="공간-변환">공간 변환</h2>
+
+<blockquote>
+  <p><strong>Vertex Shader의 ‘입력 Vertex’의 Space를 NDC Space로 바꿔주는 과정.</strong> 입력이 Object Space상의 Vertex 이면, MVP 변환을 다 해줘야한다. 단, 원래 NDC Space상의 입력이면 아무 변환도 필요 없을 수 있다.</p>
+</blockquote>
+
+<p>참고 : <a href="http://www.opengl-tutorial.org/kr/beginners-tutorials/tutorial-3-matrices/#%EB%AA%A8%EB%8D%B8-%EB%B7%B0-%ED%94%84%EB%A1%9C%EC%A0%9D%EC%85%98-%ED%96%89%EB%A0%AC">http://www.opengl-tutorial.org/kr/beginners-tutorials/tutorial-3-matrices/#%EB%AA%A8%EB%8D%B8-%EB%B7%B0-%ED%94%84%EB%A1%9C%EC%A0%9D%EC%85%98-%ED%96%89%EB%A0%AC</a></p>
+
+<h3 id="중요한-이유">중요한 이유</h3>
+
+<p>그래픽스 프로그래밍을 하면서 다양한 요구사항을 <strong>이 Matrix를 조절하는 것으로 해결할 수 있다.</strong><br />
+ex)</p>
+<ul>
+  <li>Billboard</li>
+  <li>Screen Space Particle</li>
+  <li>Render Texture (Render Texture의 중요 개념은 공간 변환과는 거리가 멀지만, 공간 변환의 이해가 필요하다.)</li>
+  <li>등등..</li>
+</ul>
+
+<p>또한 Shading 에서도 Vector, Vertex의 연산에서도 <strong>‘같은 공간’에 두고 연산을 하는 것</strong>이 중요하기에 공간에 대한 이해가 필요하다.</p>
+
+<h3 id="model-matrix-object-space---world-space">Model Matrix (Object Space -&gt; World Space)</h3>
+
+<blockquote>
+  <p><strong>여러 물체를 하나의 세상을 기준으로 표현하는 것.</strong></p>
+</blockquote>
+
+<p><img src="/assets/images/Graphics/2021-02-07-SpaceTransform/01.png" alt="01" /></p>
+<center>(Model Matrix Result) </center>
+<p><br /></p>
+
+<ul>
+  <li>Object Space : 물체의 중심을 원점으로 하는 공간. <strong>물체마다 자신의 원점이 다르다.</strong></li>
+  <li>World Space : 세상(Scene)의 중심을 원점으로 하는 공간. <strong>물체가 여러 개라도 세상의 원점은 하나.</strong></li>
+</ul>
+
+<p>간단히 2D Space에서 예를 들면,<br />
+Object Space 기준 좌표는 &lt;x,y&gt; 로 표현하고 World Space 기준 좌표는 (x,y)로 표현하자<br />
+모델 위의 점 p &lt;1,0&gt;가 있고, 모델은 World Space 기준으로 (2,2)에 있다.</p>
+
+<p><img src="/assets/images/Graphics/2021-02-07-SpaceTransform/02.png" alt="02" /></p>
+<center>(Model vs World) </center>
+<p><br /></p>
+
+<ul>
+  <li>World 기준 p 의 좌표 -&gt; &lt;1,0&gt; + (2, 2) = <strong>(3,2)</strong></li>
+  <li>Object 기준 p의 좌표 -&gt; &lt;1,0&gt; = <strong>&lt;1,0&gt;</strong></li>
+</ul>
+
+<h3 id="view-matrix-world-space---view-space">View Matrix (World Space -&gt; View Space)</h3>
+<blockquote>
+  <p><strong>세상을 카메라를 기준으로 바라보는 것</strong>
+Camera Matrix라고도 하고 Camera Space라고도 한다.</p>
+</blockquote>
+
+<h3 id="projection-matrix-view-space---clip-space-ndc-space">Projection Matrix (View Space -&gt; Clip Space (NDC Space))</h3>
+<p>정확히 말하면 Clip Space에서 NDC로 바꾸는 것은 하드웨어가 해준다. (맞나? 확인하기)</p>
+
+:ET
