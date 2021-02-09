@@ -1,0 +1,167 @@
+I"�"<h2 id="공간-변환">공간 변환</h2>
+
+<blockquote>
+  <p><strong>Vertex Shader의 ‘입력 Vertex’의 Space를 NDC Space로 바꿔주는 과정.</strong> 입력이 Object Space상의 Vertex 이면, MVP 변환을 다 해줘야한다. 단, 원래 NDC Space상의 입력이면 아무 변환도 필요 없을 수 있다.</p>
+</blockquote>
+
+<p>참고 : <a href="http://www.opengl-tutorial.org/kr/beginners-tutorials/tutorial-3-matrices/#%EB%AA%A8%EB%8D%B8-%EB%B7%B0-%ED%94%84%EB%A1%9C%EC%A0%9D%EC%85%98-%ED%96%89%EB%A0%AC">http://www.opengl-tutorial.org/kr/beginners-tutorials/tutorial-3-matrices/#%EB%AA%A8%EB%8D%B8-%EB%B7%B0-%ED%94%84%EB%A1%9C%EC%A0%9D%EC%85%98-%ED%96%89%EB%A0%AC</a></p>
+
+<h3 id="중요한-이유">중요한 이유</h3>
+
+<p>그래픽스 프로그래밍을 하면서 다양한 요구사항을 <strong>이 Matrix를 조절하는 것으로 해결할 수 있습니다.</strong><br />
+ex)</p>
+<ul>
+  <li>Billboard</li>
+  <li>Screen Space Particle</li>
+  <li>Render Texture (Render Texture의 중요 개념은 공간 변환과는 거리가 멀지만, 공간 변환의 이해가 필요하다.)</li>
+  <li>등등..</li>
+</ul>
+
+<p>또한 Shading 에서도 Vector, Vertex의 연산에서도 <strong>‘같은 공간’에 두고 연산을 하는 것</strong>이 중요하기에 공간에 대한 이해가 필요합니다.</p>
+
+<h3 id="model-matrix">Model Matrix</h3>
+<p>(Object Space -&gt; World Space)</p>
+<blockquote>
+  <p><strong>여러 물체를 하나의 세상을 기준으로 표현하는 것.</strong></p>
+</blockquote>
+
+<p><img src="/assets/images/Graphics/2021-02-07-SpaceTransform/01.png" alt="01" /></p>
+<center>(Model Matrix Result) </center>
+<p><br /></p>
+
+<ul>
+  <li>Object Space : 물체의 중심을 원점으로 하는 공간. <strong>물체마다 자신의 원점이 다르다.</strong></li>
+  <li>World Space : 세상(Scene)의 중심을 원점으로 하는 공간. <strong>물체가 여러 개라도 세상의 원점은 하나.</strong></li>
+</ul>
+
+<p>간단히 2D Space에서 예를 들면,<br />
+Object Space 기준 좌표는 &lt;x,y&gt; 로 표현하고 World Space 기준 좌표는 (x,y)로 표현한다고 할 때,
+모델 위의 점 p &lt;1,0&gt;가 있고, 모델은 World Space 기준으로 (2,2)에 있으면.</p>
+
+<p><img src="/assets/images/Graphics/2021-02-07-SpaceTransform/02.png" alt="02" /></p>
+<center>(Model vs World) </center>
+<p><br /></p>
+
+<ul>
+  <li>World 기준 p 의 좌표 -&gt; &lt;1,0&gt; + (2, 2) = <strong>(3,2)</strong></li>
+  <li>Object 기준 p의 좌표 -&gt; &lt;1,0&gt; = <strong>&lt;1,0&gt;</strong></li>
+</ul>
+
+<h4 id="model-matrix-example">Model Matrix Example</h4>
+
+<p>보통 Model Matrix는 <strong>TRS Matrix</strong>로 구성됩니다. (Translate, Rotation, Scale Matrix)</p>
+
+<p>결국 <strong>Model의 World 기준 위치, 회전 정도, 크기는 설정하기 나름입니다.</strong><br />
+Model이 세상의 중심에 그대로 있다고 하고 싶으면 TRS를 단위행렬로 만들어서 보내주면 되는 것이고, &lt;2,0,0&gt; 위치에 두고 싶다 하면 Translate를 &lt;2,0,0&gt; 해주면 됩니다.<br />
+<strong>카메라에 모델들이 어떻게 비춰질 지를 생각해서, 카메라와 모델들의 World 위치를 설정하면 됩니다.</strong></p>
+
+<p><strong>Translate</strong><br />
+참고 : <a href="https://solarianprogrammer.com/2013/05/22/opengl-101-matrices-projection-view-model/">https://solarianprogrammer.com/2013/05/22/opengl-101-matrices-projection-view-model/</a><br />
+<img src="/assets/images/Graphics/2021-02-07-SpaceTransform/03.png" alt="03" /></p>
+<center>(Translate Matrix) </center>
+<p><br /></p>
+
+<p><strong>Rotation</strong><br />
+<img src="/assets/images/Graphics/2021-02-07-SpaceTransform/04.png" alt="04" /></p>
+<center>(Rotation Matrix) </center>
+<p><br /></p>
+
+<p><strong>Scale</strong><br />
+<img src="/assets/images/Graphics/2021-02-07-SpaceTransform/05.png" alt="05" /></p>
+<center>(Scale Matrix) </center>
+<p><br /></p>
+
+<h3 id="view-matrix">View Matrix</h3>
+<p>(World Space -&gt; View Space)</p>
+<blockquote>
+  <p><strong>세상을 카메라를 기준으로 바라보는 것.</strong></p>
+</blockquote>
+
+<p><img src="/assets/images/Graphics/2021-02-07-SpaceTransform/07.png" alt="07" /></p>
+<center>(View Matrix Result) </center>
+<p><br /></p>
+
+<p>다른 말로는, 세상을 기준으로 표현된 정점들을 Camera를 기준으로 다시 표현하는 것입니다. 또한 View Matrix는 Camera Matrix라고도 하고 View Space는 Camera Space라고도 합니다.</p>
+
+<p>이걸 직관적으로 표현하면, ‘World’의 원점을 기준으로 정의된 Vertex 들을, ‘Camera’의 원점을 기준으로 재정의 하는 것을 의미합니다.<br />
+이를 잘 생각해보면, <strong>‘Camera’의 Model Matrix</strong>와 <strong>View Matrix의 관계</strong>를 생각해 볼 수 있습니다.</p>
+
+<ul>
+  <li><strong>Camera의 Model Matrix</strong> : Camera 기준의 좌표를 World Space로 옮김.</li>
+  <li><strong>View Matrix</strong> : World Space 좌표를 Camera 기준으로 바꿈.</li>
+  <li><strong>결론 : Inverse(Camera의 Model Matrix) = View Matrix</strong></li>
+</ul>
+
+<p>참고 : <a href="https://www.3dgep.com/understanding-the-view-matrix/#Converting_between_Camera_Transformation_Matrix_and_View_Matrix">https://www.3dgep.com/understanding-the-view-matrix/#Converting_between_Camera_Transformation_Matrix_and_View_Matrix</a></p>
+
+<p><img src="/assets/images/Graphics/2021-02-07-SpaceTransform/06.png" alt="06" /></p>
+<center>(Camera의 Model Matrix와 View Matrix의 관계) </center>
+<p><br /></p>
+
+<p>(참고로 Camera의 Model Matrix의 S는 의미가 없으므로 카메라의 위치, 회전만 고려하면 됩니다.)</p>
+
+<h4 id="look-at-matrix">Look At Matrix</h4>
+
+<p>View Matrix를 만들기 위해 자주쓰이는 개념이 <strong>LookAt</strong> 입니다.<br />
+주로 2~3가지 입력을 받습니다.</p>
+
+<ol>
+  <li><strong>회전</strong>만 변경하는 경우 (Camera 객체에 호출 함수로 제공되는 경우가 많습니다.)
+    <ol>
+      <li>forward vector</li>
+      <li>up vector</li>
+    </ol>
+  </li>
+  <li><strong>회전</strong>과 <strong>위치</strong> 모두 변경하는 경우 (glm의 Look At이 이 방식입니다.)
+    <ol>
+      <li>카메라의 위치</li>
+      <li>forward vector</li>
+      <li>up vector</li>
+    </ol>
+  </li>
+</ol>
+
+<h3 id="projection-matrix">Projection Matrix</h3>
+<p>(View Space -&gt; Clip Space (NDC Space))</p>
+<blockquote>
+  <p><strong>카메라의 시야각, 원근법 적용 여부 등을 적용.</strong></p>
+</blockquote>
+
+<p><img src="/assets/images/Graphics/2021-02-07-SpaceTransform/08.png" alt="08" /></p>
+<center>(Projection Matrix) </center>
+<p><br /></p>
+
+<p>참고 : <a href="https://stackoverflow.com/questions/21841598/when-does-the-transition-from-clip-space-to-screen-coordinates-happen">https://stackoverflow.com/questions/21841598/when-does-the-transition-from-clip-space-to-screen-coordinates-happen</a></p>
+
+<p>Clip Space와 NDC Space는 다릅니다. Clip Space는 4차원의 공간이고 <strong>Clip Space의 x,y,z를 각각 w로 나눈 것이 NDC Space입니다.</strong><br />
+다른 의견으로는, 두 공간은 개념적으로 같은 공간이지만 표현 방식만 달리한 것이라는 의견도 있습니다. (Homogeneous coord (4차원), Cartesian coord (3차원))</p>
+
+<p><strong>NDC 공간은 x,y,z 모두 [-1, 1]의 범위의 unit cube 공간</strong>입니다. 재미있는 것은 NDC 공간은 DirectX에서는 z 범위가 [0,1] 입니다. (이렇게 하면 z-fighting 과 같은 issue에서 이득을 얻을 수 있다고 합니다. (<a href="https://gamedev.stackexchange.com/questions/29018/why-does-opengl-require-all-coordinates-in-1-1-ndc/29020">https://gamedev.stackexchange.com/questions/29018/why-does-opengl-require-all-coordinates-in-1-1-ndc/29020</a>)<br />
+OpenGL도 4.3 이 후 부터는 설정을 통해 z 범위를 [0,1]로 설정할 수 있습니다.</p>
+
+<h4 id="perspective-vs-orthogonal">Perspective vs Orthogonal</h4>
+
+<p>결국 Projection Matrix에서 중요한 건 Projection 방식입니다.<br />
+Projection Matrix는 크게 두 개로 나뉩니다.</p>
+<ul>
+  <li><strong>Perspective</strong> : 원근법 적용</li>
+  <li><strong>Othogonal</strong> : 원근법 적용하지 않음.</li>
+</ul>
+
+<p>또한 Projection Matrix를 만드는 방법도 다양한데</p>
+<ol>
+  <li>near, far, right, left, bottom, top 으로 구하는 방법</li>
+  <li>fov_width, fov_height, near, far로 구하는 방법</li>
+  <li>fov, aspect, near, far로 구하는 방법</li>
+</ol>
+
+<p>등이 있습니다.</p>
+
+<h3 id="정리">정리</h3>
+
+<p><img src="/assets/images/Graphics/2021-02-07-SpaceTransform/09.png" alt="09" /></p>
+<center>(전체 변환 과정) </center>
+<p><br /></p>
+
+<p><a href="https://en.wikibooks.org/wiki/GLSL_Programming/Vertex_Transformations">https://en.wikibooks.org/wiki/GLSL_Programming/Vertex_Transformations</a></p>
+:ET
